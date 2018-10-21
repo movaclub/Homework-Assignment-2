@@ -31,7 +31,7 @@ handlers.usrAdd = (data, cb) => {
 
 
   } else {
-    cb({status:200,saved:false});
+    cb({status:406,saved:false}); // not acceptable
   }
   console.log('handlers.usrAdd: ', user);
 

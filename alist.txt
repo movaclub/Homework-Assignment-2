@@ -1,0 +1,5 @@
+1|John Dow|jd@i.ua|2020 Central Av.|password
+2|John Dowe|jde@i.ua|2020 Central Av.|password
+3|John Dowee|jdee@i.ua|2020 Central Av.|password
+4|John Doweee|jdeee@i.ua|2020 Central Av.|password
+5|John Doweeee|jdeeee@i.ua|2020 Central Av.|password
