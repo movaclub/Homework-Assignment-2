@@ -8,36 +8,58 @@ const menu = require('./../menu'); // index.js - module
 const users = require('./../users'); // index.js - module, users.json - user DB
 
 // reusable user object
-const user = {
-  id       :null,
-  full_name:'',
-  str_addr: '',
-  password: '',
-  email:    ''
-};
+// const user = {
+//   id       :null,
+//   full_name:'',
+//   str_addr: '',
+//   password: '',
+//   email:    ''
+// };
+
 
 const handlers = {};
 
-// create a new user acc: data - user object: { /- see above -/ }
-handlers.usrAdd = (data, cb) => {
+// create a new user - save in users.db
+handlers.usrAdd = (datum, cb) => {
 
-  if (typeof(data) !== 'undefined'){ // a subtle trait of checking
+	if (typeof(datum) !== 'undefined'){ // a subtle trait of checking
 
-    user.full_name = data.full_name;
-    user.str_addr  = data.str_addr;
-    user.password  = data.password;
-    user.email     = data.email;
-    cb({status:200,saved:true});
+		let uid = 1; // new user id
+
+		if( datum.usrobj.empty === false ){
+			uid = datum.usrobj.usrList.length + 1;
+		}
+
+// 		datum.usrobj.usrList.push( { id:       uid,
+// 																full_name: datum.payload.full_name,
+// 																email:     datum.payload.email,
+// 																str_addr:  datum.payload.str_addr,
+// 																password:  datum.payload.password } );
+		let userListString = '';
+		let userList = [];
+		// compile list of user strings (entries in db format)
+		datum.usrobj.usrList.forEach((oneUser) => {
+			userList.push(`${oneUser.id}|${oneUser.full_name}|${oneUser.email}|${oneUser.str_addr}|${ oneUser.password}`);
+		});
+		userList.push(`${uid}|${datum.payload.full_name}|${datum.payload.email}|${datum.payload.str_addr}|${ datum.payload.password}`);
+		// compile a final user string
+		userListString = userList.join("\n");
+// 		userList.forEach((oneUser) => {
+// 			userListString += oneUser + "\n";
+// 		});
+
+		console.log('userListString: ', userListString);
+
+		// save in users db
+		users.save(userListString, (err) => {
+			console.log("ERRor: ", err);
+			cb({status:200,saved:true, error: err});
+		});
 
 
   } else {
     cb({status:406,saved:false}); // not acceptable
   }
-  console.log('handlers.usrAdd: ', user);
-
-//   users.create(user, (err) => {
-//
-//   });
 };
 
 // upd a user record
@@ -63,7 +85,7 @@ handlers.notFound = (data,callback) => {
 handlers.createRandomString = () => {
 
   // generator alphabet
-  const possibleCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_';
+  const possibleCharacters = '-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_';
   let str = '';
   for(i = 1; i <= 13; i++) {
       // Get a random charactert from the possibleCharacters string

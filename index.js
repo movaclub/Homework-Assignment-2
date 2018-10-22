@@ -6,6 +6,7 @@ const StringDecoder = require('string_decoder').StringDecoder;
 
 // handers - app useful methods
 const handlers = require('./handlers'); // index.js - module
+const users = require('./users'); // users db, etc
 
 // the server acceptable HTTP methods
 const acceptableMethods = ['post','get','put','delete'];
@@ -14,6 +15,13 @@ const acceptableMethods = ['post','get','put','delete'];
 const routes = {
   'user/add': handlers.usrAdd
 };
+
+// get initial user list, 'empty` - list is empty if true
+let usrobj = users.get();
+// console.log('USROBJ: ', usrobj);
+let userList = usrobj.usrList;
+let empty = usrobj.empty;
+console.log('usrList: ', usrobj.usrList);
 
 let server = http.createServer((req,res) => {
 
@@ -47,7 +55,8 @@ let server = http.createServer((req,res) => {
       'trimmedPath': trimmedPath,
       'method'     : method,
       'headers'    : headers,
-      'payload'    : JSON.parse(buffer)
+      'payload'    : JSON.parse(buffer),
+			 'usrobj'    : usrobj
     };
 
     // console.log('DATUM: ', datum);
@@ -59,8 +68,9 @@ let server = http.createServer((req,res) => {
       // process the request
       if ( typeof(routes[trimmedPath]) !== 'undefined' ){
         let chosenHandler = routes[trimmedPath];
-        chosenHandler(datum.payload, (ret) => {
-          // console.log('RET: ', ret);
+        chosenHandler(datum, (ret) => {
+					usrobj = users.get();
+					console.log('USROBJ: ', usrobj);
           res.writeHead(ret.status);
           res.end(JSON.stringify(ret));
         });
