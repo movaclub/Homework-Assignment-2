@@ -23,10 +23,10 @@ handlers.usrAdd = (datum, cb) => {
 		let uid = 1; // new user id
 
 		if( datum.usrobj.empty === false ){
-			for (let i = 0; i < datum.usrobj.usrList.length; i++){
-				uid = uid < datum.usrobj.usrList[i]['id'] ? parseInt(datum.usrobj.usrList[i]['id']) : parseInt(uid);
+			for (let i = 0; i < datum.usrobj.usrList.length; i++){ // let's get the highest uid
+				uid = uid < datum.usrobj.usrList[i]['id'] ? parseInt(datum.usrobj.usrList[i]['id']) : parseInt(uid); // TODO:encrypt password
 			}
-			uid +=1;
+			uid +=1; // new uid
 		}
 
 		let userListString = '';
@@ -46,7 +46,7 @@ handlers.usrAdd = (datum, cb) => {
 
 		// save in users db
 		users.save(userListString, (err) => {
-			console.log("ERRor: ", err);
+			//console.log("ERRor: ", err);
 			cb({status:200,saved:true, error: err});
 		});
 
@@ -57,16 +57,78 @@ handlers.usrAdd = (datum, cb) => {
 };
 
 // upd a user record
-handlers.usrUpd = (data, cb) => {
-  user = data;
+handlers.usrUpd = (datum, cb) => {
 
-};
+	// quick check of user input
+	if ( typeof(datum) == 'object' &&
+			typeof(datum.payload) == 'object' &&
+			datum.payload.id &&
+			datum.payload.full_name &&
+			datum.payload.email &&
+			datum.payload.str_addr &&
+			datum.payload.password ){
+
+		// find an exisisting user record
+		for (let i = 0; i < datum.usrobj.usrList.length; i++){
+			if ( datum.payload.id == datum.usrobj.usrList[i]['id'] )
+				datum.usrobj.usrList[i] = datum.payload; // TODO:encrypt password
+		}
+
+		let userListString = '';
+		let userList = [];
+
+		// compile list of user strings (entries in db format)
+		datum.usrobj.usrList.forEach((oneUser) => {
+			userList.push(`${oneUser.id}|${oneUser.full_name}|${oneUser.email}|${oneUser.str_addr}|${ oneUser.password}`);
+		});
+
+		// compile a final user string
+		userListString = userList.join("\n");
+
+		// save in users db
+		users.save(userListString, (err) => {
+			cb({status:200,updated:true, error: err});
+		});
+
+
+  } else {
+		cb({status:406,updated:false, error: 'Invalid input data'}); // not acceptable
+}};
 
 // del a user record
-handlers.usrDel = (data, cb) => {
-  user = data;
+handlers.usrDel = (datum, cb) => {
 
-};
+	// quick check of user input
+	if ( typeof(datum) == 'object' &&
+			typeof(datum.payload) == 'object' &&
+			datum.payload.id ){
+
+		// find an exisisting user record
+		for (let i = 0; i < datum.usrobj.usrList.length; i++){
+			if ( datum.payload.id == datum.usrobj.usrList[i]['id'] )
+				datum.usrobj.usrList.splice(i,1);
+		}
+
+		let userListString = '';
+		let userList = [];
+
+		// compile list of user strings (entries in db format)
+		datum.usrobj.usrList.forEach((oneUser) => {
+			userList.push(`${oneUser.id}|${oneUser.full_name}|${oneUser.email}|${oneUser.str_addr}|${ oneUser.password}`);
+		});
+
+		// compile a final user string
+		userListString = userList.join("\n");
+
+		// save in users db
+		users.save(userListString, (err) => {
+			cb({status:200,deleted:true, error: err});
+		});
+
+
+  } else {
+		cb({status:406,deleted:false, error: 'Invalid input data'}); // not acceptable
+}};
 
 
 // Not-Found method status

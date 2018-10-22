@@ -13,7 +13,9 @@ const acceptableMethods = ['post','get','put','delete'];
 
 // API routes
 const routes = {
-  'user/add': handlers.usrAdd
+  'user/add': handlers.usrAdd, // payload = user obj
+	'user/upd': handlers.usrUpd, // payload = user obj
+	'user/del': handlers.usrDel  // payload = user id
 };
 
 // get initial user list, 'empty` - list is empty if true
@@ -55,7 +57,6 @@ let server = http.createServer((req,res) => {
       'trimmedPath': trimmedPath,
       'method'     : method,
       'headers'    : headers,
-      'payload'    : JSON.parse(buffer),
 			 'usrobj'    : usrobj
     };
 
@@ -65,12 +66,16 @@ let server = http.createServer((req,res) => {
     // method check
     if ( acceptableMethods.indexOf(method) > -1 ){
 
+			// payload is there if POST only
+			datum.payload = method == 'post' ? JSON.parse(buffer) : null;
+
       // process the request
       if ( typeof(routes[trimmedPath]) !== 'undefined' ){
         let chosenHandler = routes[trimmedPath];
         chosenHandler(datum, (ret) => {
 					usrobj = users.get();
-					console.log('USROBJ: ', usrobj);
+// 					console.log('USROBJ.empty: ', usrobj.empty);
+// 					console.log('USROBJ: ', usrobj);
           res.writeHead(ret.status);
           res.end(JSON.stringify(ret));
         });
@@ -93,5 +98,3 @@ let server = http.createServer((req,res) => {
 server.listen(3000, () => {
   console.log('server is up & running on port 3000');
 });
-
-// TypeError [ERR_INVALID_ARG_TYPE]: The "chunk" argument must be one of type string or Buffer. Received type object
