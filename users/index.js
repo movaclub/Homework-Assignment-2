@@ -47,10 +47,6 @@ users.save = (usrList, cb) => { // usrList - join'ed & piped string of user(s)
 	fs.open(udb, 'w', (err, FD) => { // udb - users.db file
     if(!err && FD){
 
-// 			fs.truncate(FD, (err) => {
-
-// 				if(!err){
-					// write & close
 					fs.writeFile(FD, usrList, (err) => {
 						if(!err){
 							// close FD
@@ -65,14 +61,6 @@ users.save = (usrList, cb) => { // usrList - join'ed & piped string of user(s)
 							cb(error);
 						}
 					});
-
-
-// 				} else {
-// 					error += 'Error writing to user DB.';
-// 					console.log(error);
-// 					cb(error);
-// 				}
-// 			});
 
     } else {
 			error += 'Cannot open user DB file.';

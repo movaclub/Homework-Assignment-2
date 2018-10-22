@@ -7,48 +7,42 @@
 const menu = require('./../menu'); // index.js - module
 const users = require('./../users'); // index.js - module, users.json - user DB
 
-// reusable user object
-// const user = {
-//   id       :null,
-//   full_name:'',
-//   str_addr: '',
-//   password: '',
-//   email:    ''
-// };
-
-
 const handlers = {};
 
 // create a new user - save in users.db
 handlers.usrAdd = (datum, cb) => {
 
-	if (typeof(datum) !== 'undefined'){ // a subtle trait of checking
+	// quick check of user input
+	if ( typeof(datum) == 'object' &&
+			typeof(datum.payload) == 'object' &&
+			datum.payload.full_name &&
+			datum.payload.email &&
+			datum.payload.str_addr &&
+			datum.payload.password ){
 
 		let uid = 1; // new user id
 
 		if( datum.usrobj.empty === false ){
-			uid = datum.usrobj.usrList.length + 1;
+			for (let i = 0; i < datum.usrobj.usrList.length; i++){
+				uid = uid < datum.usrobj.usrList[i]['id'] ? parseInt(datum.usrobj.usrList[i]['id']) : parseInt(uid);
+			}
+			uid +=1;
 		}
 
-// 		datum.usrobj.usrList.push( { id:       uid,
-// 																full_name: datum.payload.full_name,
-// 																email:     datum.payload.email,
-// 																str_addr:  datum.payload.str_addr,
-// 																password:  datum.payload.password } );
 		let userListString = '';
 		let userList = [];
+
 		// compile list of user strings (entries in db format)
 		datum.usrobj.usrList.forEach((oneUser) => {
 			userList.push(`${oneUser.id}|${oneUser.full_name}|${oneUser.email}|${oneUser.str_addr}|${ oneUser.password}`);
 		});
+
 		userList.push(`${uid}|${datum.payload.full_name}|${datum.payload.email}|${datum.payload.str_addr}|${ datum.payload.password}`);
+
 		// compile a final user string
 		userListString = userList.join("\n");
-// 		userList.forEach((oneUser) => {
-// 			userListString += oneUser + "\n";
-// 		});
 
-		console.log('userListString: ', userListString);
+		//console.log('userListString: ', userListString);
 
 		// save in users db
 		users.save(userListString, (err) => {
@@ -58,7 +52,7 @@ handlers.usrAdd = (datum, cb) => {
 
 
   } else {
-    cb({status:406,saved:false}); // not acceptable
+		cb({status:406,saved:false, error: 'Invalid input data'}); // not acceptable
   }
 };
 
