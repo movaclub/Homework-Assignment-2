@@ -1,7 +1,7 @@
 // handlers & helpers
 
 // prerequisites
-// const crypto = require('crypto');
+const crypto = require('crypto');
 
 // user-defined libs
 const menu = require('./../menu'); // index.js - module
@@ -24,7 +24,7 @@ handlers.usrAdd = (datum, cb) => {
 
 		if( datum.usrobj.empty === false ){
 			for (let i = 0; i < datum.usrobj.usrList.length; i++){ // let's get the highest uid
-				uid = uid < datum.usrobj.usrList[i]['id'] ? parseInt(datum.usrobj.usrList[i]['id']) : parseInt(uid); // TODO:encrypt password
+				uid = uid < datum.usrobj.usrList[i]['id'] ? parseInt(datum.usrobj.usrList[i]['id']) : parseInt(uid);
 			}
 			uid +=1; // new uid
 		}
@@ -34,10 +34,10 @@ handlers.usrAdd = (datum, cb) => {
 
 		// compile list of user strings (entries in db format)
 		datum.usrobj.usrList.forEach((oneUser) => {
-			userList.push(`${oneUser.id}|${oneUser.full_name}|${oneUser.email}|${oneUser.str_addr}|${ oneUser.password}`);
+			userList.push(`${oneUser.id}|${oneUser.full_name}|${oneUser.email}|${oneUser.str_addr}|${ oneUser.password }`);
 		});
 
-		userList.push(`${uid}|${datum.payload.full_name}|${datum.payload.email}|${datum.payload.str_addr}|${ datum.payload.password}`);
+		userList.push(`${uid}|${datum.payload.full_name}|${datum.payload.email}|${datum.payload.str_addr}|${ handlers.hash(datum.payload.password)}`);
 
 		// compile a final user string
 		userListString = userList.join("\n");
@@ -151,6 +151,16 @@ handlers.createRandomString = () => {
   }
   // Return the final string
   return str;
+};
+
+// Create a SHA256 hash
+handlers.hash = function(str){
+	if(typeof(str) == 'string' && str.length > 0){
+		var hash = crypto.createHmac('sha256', 'nothingCompareToYou').update(str).digest('hex');
+		return hash;
+	} else {
+		return false;
+	}
 };
 
 // TEST: menu output

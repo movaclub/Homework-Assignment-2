@@ -53,10 +53,14 @@ users.save = (usrList, cb) => { // usrList - join'ed & piped string of user(s)
 							fs.close(FD, (err) => {
 								if(!err){
 									cb(error);
+								} else {
+									error += 'Error closing user DB file.';
+									console.log(error);
+									cb(error);
 								}
 							});
 						} else {
-							error += 'Error closing user DB file.';
+							error += 'Error writing to user DB file.';
 							console.log(error);
 							cb(error);
 						}
@@ -70,8 +74,6 @@ users.save = (usrList, cb) => { // usrList - join'ed & piped string of user(s)
   });
 };
 
-
 // exported singleton
 
 module.exports = users;
-
