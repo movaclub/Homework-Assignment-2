@@ -7,6 +7,7 @@ const StringDecoder = require('string_decoder').StringDecoder;
 // handers - app useful methods
 const handlers = require('./handlers'); // index.js - module
 const users = require('./users'); // users db, etc
+const sessions = require('./sessions');
 
 // the server acceptable HTTP methods
 const acceptableMethods = ['post','get','put','delete'];
@@ -14,6 +15,7 @@ const acceptableMethods = ['post','get','put','delete'];
 // API routes
 const routes = {
   'user/login' : handlers.usrLogin,
+	'user/logout': handlers.usrLogout,
   'user/add': handlers.usrAdd, // payload = user obj
 	'user/upd': handlers.usrUpd, // payload = user obj
 	'user/del': handlers.usrDel  // payload = user id
@@ -21,10 +23,14 @@ const routes = {
 
 // get initial user list, 'empty` - list is empty if true
 let usrobj = users.get();
+
 // console.log('USROBJ: ', usrobj);
 let userList = usrobj.usrList;
+let sidList = sessions.get();
 let empty = usrobj.empty;
 console.log('usrList: ', usrobj.usrList);
+console.log('sidList: ', sidList);
+// console.log('sessions: ', sessions);
 
 let server = http.createServer((req,res) => {
 
@@ -58,7 +64,8 @@ let server = http.createServer((req,res) => {
       'trimmedPath': trimmedPath,
       'method'     : method,
       'headers'    : headers,
-			 'usrobj'    : usrobj
+			 'usrobj'    : usrobj,
+			 'sidList'   : sidList
     };
 
     // console.log('DATUM: ', datum);
@@ -75,6 +82,7 @@ let server = http.createServer((req,res) => {
         let chosenHandler = routes[trimmedPath];
         chosenHandler(datum, (ret) => {
 					usrobj = users.get();
+					sidList = sessions.get().sids;
 // 					console.log('USROBJ.empty: ', usrobj.empty);
 // 					console.log('USROBJ: ', usrobj);
           res.writeHead(ret.status);

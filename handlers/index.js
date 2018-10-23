@@ -16,7 +16,7 @@ handlers.usrLogin = (datum, cb) => {
 	let usrList = users.get().usrList;
   console.log('PAYload: ', datum.payload);
   console.log('users: ', users);
-  console.log('sidList: ', sidList);
+	console.log('sidList: ', sidList);
 
   if ( typeof(datum) == 'object' &&
 			typeof(datum.payload) == 'object' &&
@@ -72,12 +72,29 @@ handlers.usrLogin = (datum, cb) => {
 };
 
 handlers.usrLogout = (datum, cb) => {
+
+	let sidList = sessions.get();
+
 	if ( typeof(datum) == 'object' &&
 		typeof(datum.payload) == 'object' &&
-		datum.payload.sid ){
-			// do logout
+					 datum.payload.sid ){
+			for(let i = 0; i < sidList.sids.length; i++){
+
+				if ( sidList.sids[i]['sid'] == datum.payload.sid ){
+					sidList.sids.splice(i,1);
+					let sidString = '';
+
+					for(let i = 0; i < sidList.sids.length; i++){
+						sidString += `${sidList.sids[i]['uid']}|${sidList.sids[i]['sid']}\n`;
+					}
+
+					sessions.save(sidString, (err) => {
+						cb({status:200,  error:''});
+					});
+				}
+			}
 		} else {
-			cb({status:406,logout:false, error: 'Logout failed'}); // not acceptable
+			cb({status:406,logout:false, error: 'Logout data invalid'}); // not acceptable
 		}
 };
 
