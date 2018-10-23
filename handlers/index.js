@@ -5,9 +5,32 @@ const crypto = require('crypto');
 
 // user-defined libs
 const menu = require('./../menu'); // index.js - module
-const users = require('./../users'); // index.js - module, users.json - user DB
+const users = require('./../users'); // index.js - module, users.db - user DB
+const session = require('./../session'); // index.js - module, session.db - session DB
 
 const handlers = {};
+
+handlers.usrLogin (datum, cb) => {
+	if ( typeof(datum) == 'object' &&
+			typeof(datum.payload) == 'object' &&
+			datum.payload.email &&
+			datum.payload.password ){
+		// do process login
+
+	} else {
+		cb({status:406,login:false, error: 'Invalid login or password'}); // not acceptable
+	}
+};
+
+handlers.usrLogout (datum, cb) => {
+	if ( typeof(datum) == 'object' &&
+		typeof(datum.payload) == 'object' &&
+		datum.payload.sid ){
+			// do logout
+		} else {
+			cb({status:406,logout:false, error: 'Logout failed'}); // not acceptable
+		}
+};
 
 // create a new user - save in users.db
 handlers.usrAdd = (datum, cb) => {

@@ -74,6 +74,4 @@ users.save = (usrList, cb) => { // usrList - join'ed & piped string of user(s)
   });
 };
 
-// exported singleton
-
 module.exports = users;
