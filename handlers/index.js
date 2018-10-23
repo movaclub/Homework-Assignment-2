@@ -5,24 +5,54 @@ const crypto = require('crypto');
 
 // user-defined libs
 const menu = require('./../menu'); // index.js - module
-const users = require('./../users'); // index.js - module, users.db - user DB
-const session = require('./../session'); // index.js - module, session.db - session DB
+const users = require('./../users').get().usrList; // users.db - user DB
+const sessions = require('./../sessions'); // index.js - module, session.db - session DB
 
 const handlers = {};
 
-handlers.usrLogin (datum, cb) => {
-	if ( typeof(datum) == 'object' &&
+handlers.usrLogin = (datum, cb) => {
+
+  let sidList = sessions.get();
+  console.log('PAYload: ', datum.payload);
+  console.log('users: ', users);
+  console.log('sidList: ', sidList);
+
+  if ( typeof(datum) == 'object' &&
 			typeof(datum.payload) == 'object' &&
 			datum.payload.email &&
 			datum.payload.password ){
-		// do process login
+
+    // find the user record
+    let logged = false; // email & pswd found or not
+    let uid = null; // found user ID
+    let sid = null; // a new sid
+
+    for(let i=0; i<users.length; i++){
+      if( datum.payload.email == users[i]['email'] &&
+        handlers.hash(datum.payload.password) == users[i]['password'] ){
+        logged = true;
+        uid = users[i]['id'];
+      }
+    }
+
+    if(logged){
+      if(!sidList.empty){
+        // find and delete sid, if uid
+        // create and add a new sid
+      } else {
+        // just create and add sid
+        sid = handlers.createRandomString();
+      }
+    }
+    // send response
+    cb({status:200, login:logged, error:'', sid:sid, uid: uid});
 
 	} else {
-		cb({status:406,login:false, error: 'Invalid login or password'}); // not acceptable
+		cb({status:406,login:false, error: 'Invalid login or password', sid: null}); // not acceptable
 	}
 };
 
-handlers.usrLogout (datum, cb) => {
+handlers.usrLogout = (datum, cb) => {
 	if ( typeof(datum) == 'object' &&
 		typeof(datum.payload) == 'object' &&
 		datum.payload.sid ){
@@ -94,7 +124,7 @@ handlers.usrUpd = (datum, cb) => {
 		// find an exisisting user record
 		for (let i = 0; i < datum.usrobj.usrList.length; i++){
 			if ( datum.payload.id == datum.usrobj.usrList[i]['id'] )
-				datum.usrobj.usrList[i] = datum.payload; // TODO:encrypt password
+				datum.usrobj.usrList[i] = datum.payload;
 		}
 
 		let userListString = '';
@@ -102,7 +132,7 @@ handlers.usrUpd = (datum, cb) => {
 
 		// compile list of user strings (entries in db format)
 		datum.usrobj.usrList.forEach((oneUser) => {
-			userList.push(`${oneUser.id}|${oneUser.full_name}|${oneUser.email}|${oneUser.str_addr}|${ oneUser.password}`);
+      userList.push(`${oneUser.id}|${oneUser.full_name}|${oneUser.email}|${oneUser.str_addr}|${ oneUser.password}`); // TODO:encrypt password
 		});
 
 		// compile a final user string

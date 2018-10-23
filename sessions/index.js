@@ -68,3 +68,24 @@ session.save = (sidList, cb) => {
 };
 
 module.exports = session;
+
+// {
+//   "email":"a@mail.ua",
+//   "full_name":"Don Xiqo",
+//   "str_addr":"1-a Parlm Str.",
+//   "password":"IKNOW"
+// }
+//
+// {
+//   "email":"b@mail.in",
+//   "full_name":"Fig Wam",
+//   "str_addr":"2-b PengYou Str.",
+//   "password":"youKNOW"
+// }
+
+// {
+//   "email":"c@outlook.com",
+//   "full_name":"Billy Willy",
+//   "str_addr":"3301 Califonia Str.",
+//   "password":"theyKNOW"
+// }

@@ -13,6 +13,7 @@ const acceptableMethods = ['post','get','put','delete'];
 
 // API routes
 const routes = {
+  'user/login' : handlers.usrLogin,
   'user/add': handlers.usrAdd, // payload = user obj
 	'user/upd': handlers.usrUpd, // payload = user obj
 	'user/del': handlers.usrDel  // payload = user id
