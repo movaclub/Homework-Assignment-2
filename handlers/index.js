@@ -24,32 +24,50 @@ handlers.usrLogin = (datum, cb) => {
 			datum.payload.password ){
 
     // find the user record
-    let logged = false; // email & pswd found or not
+    let registered = false; // email & pswd found or not
+    let logged = false; // logged already or not
     let uid = null; // found user ID
     let sid = null; // a new sid
 
     for(let i=0; i<usrList.length; i++){
 			if( datum.payload.email == usrList[i]['email'] &&
 				handlers.hash(datum.payload.password) == usrList[i]['password'] ){
-        logged = true;
+				registered = true;
         uid = usrList[i]['id'];
       }
     }
 
-    if(logged){
-      if(!sidList.empty){
-        // find and delete sid, if uid
-        // create and add a new sid
-      } else {
-        // just create and add sid
-        sid = handlers.createRandomString();
-      }
-    }
+    if(registered){
+
+			for(let i = 0; i < sidList.sids.length; i++){
+				if ( sidList.sids[i]['uid'] == uid ){
+					logged = true;
+					cb({status:200, logged:true, error:'', sid:sidList.sids[i]['sid'], uid: uid});
+				}
+			}
+
+			if(!logged){
+				// just create and add sid
+	      sid = handlers.createRandomString();
+				let sidString = `${uid}|${sid}\n`;
+
+				for(let i = 0; i < sidList.sids.length; i++){
+					sidString += `${sidList.sids[i]['uid']}|${sidList.sids[i]['sid']}\n`;
+				}
+
+				sessions.save(sidString, (err) => {
+					cb({status:200, logged:true, error:'', sid:sid, uid: uid});
+				});
+			}
+
+    } else {
+			cb({status:200,logged:false, error: 'Invalid login or password', sid: null});
+		}
     // send response
-    cb({status:200, login:logged, error:'', sid:sid, uid: uid});
+   // cb({status:200, login:logged, error:'', sid:sid, uid: uid});
 
 	} else {
-		cb({status:406,login:false, error: 'Invalid login or password', sid: null}); // not acceptable
+		cb({status:406,logged:false, error: 'Invalid login data', sid: null}); // not acceptable
 	}
 };
 

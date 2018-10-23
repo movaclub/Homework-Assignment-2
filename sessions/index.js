@@ -23,9 +23,8 @@ session.get = () => {
 		if(typeof(line) !== 'undefined' && line.match(/^\d/)){
 			one = line.split(/[|]/); // '|' - line separator
 			sids.push({
-				id: one[0], // record id
-				uid:one[1], // user id
-				sid:one[2]  // session id
+				uid:one[0], // user id
+				sid:one[1]  // session id
 			});
 			empty = false;
 		}
