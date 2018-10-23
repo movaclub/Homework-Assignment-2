@@ -5,7 +5,7 @@ const crypto = require('crypto');
 
 // user-defined libs
 const menu = require('./../menu'); // index.js - module
-const users = require('./../users').get().usrList; // users.db - user DB
+const users = require('./../users'); // users.db - user DB
 const sessions = require('./../sessions'); // index.js - module, session.db - session DB
 
 const handlers = {};
@@ -13,6 +13,7 @@ const handlers = {};
 handlers.usrLogin = (datum, cb) => {
 
   let sidList = sessions.get();
+	let usrList = users.get().usrList;
   console.log('PAYload: ', datum.payload);
   console.log('users: ', users);
   console.log('sidList: ', sidList);
@@ -27,11 +28,11 @@ handlers.usrLogin = (datum, cb) => {
     let uid = null; // found user ID
     let sid = null; // a new sid
 
-    for(let i=0; i<users.length; i++){
-      if( datum.payload.email == users[i]['email'] &&
-        handlers.hash(datum.payload.password) == users[i]['password'] ){
+    for(let i=0; i<usrList.length; i++){
+			if( datum.payload.email == usrList[i]['email'] &&
+				handlers.hash(datum.payload.password) == usrList[i]['password'] ){
         logged = true;
-        uid = users[i]['id'];
+        uid = usrList[i]['id'];
       }
     }
 
