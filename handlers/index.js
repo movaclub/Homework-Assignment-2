@@ -1,10 +1,12 @@
 // handlers & helpers
 
 // prerequisites
+const qs = require("querystring");
 const crypto = require('crypto');
+const http = require('http');
 
 // user-defined libs
-const emails = require('./../emails'); // index.js - module
+// const emails = require('./../emails'); // index.js - module
 const menu = require('./../menu'); // index.js - module
 const users = require('./../users'); // users.db - user DB
 const sessions = require('./../sessions'); // index.js - module, session.db - session DB
@@ -12,9 +14,53 @@ const sessions = require('./../sessions'); // index.js - module, session.db - se
 const handlers = {};
 
 handlers.email = (datum, cb) => {
-	emails.send(datum, (err) =>{
-		cb({status:200, emailed:true});
+
+// 	console.log('DATUM-emailer: ', datum);
+
+	let message = qs.stringify({
+		"from":datum.payload.from,
+		"to":datum.payload.to,
+		"subject":datum.payload.subject,
+		"text":datum.payload.text
 	});
+
+	const options = {
+		"hostname": "api.mailgun.net",
+		"path": "/v3/sandboxa29aec1210574cdc966b91e1ec6c56e4.mailgun.org/messages",
+
+		"auth":"api:b108c4a1c964e1e7386bc4eaa30b1ce3-4836d8f5-a17dc999",
+		"method":"POST",
+		"headers":{
+			'Content-Length': message.length,
+			'Content-Type': 'application/x-www-form-urlencoded'
+		}
+	};
+	let error = '';
+	let response = {};
+
+	let req = http.request(options, (res) => {
+		response = res;
+		console.log('STATUS:', res.statusCode);
+		console.log('HEADERS:', JSON.stringify(res.headers));
+		let chunks = [];
+
+		res.on('data', (chunk) => {
+			chunks.push(chunk);
+		});
+
+		res.on('end', () => {
+			body = Buffer.concat(chunks);
+			console.log(body.toString());
+		});
+
+
+	});
+
+	req.on('error', (err) => { error = JSON.stringify(err); console.log('EEEERRR: ', err)});
+	req.write(message);
+	req.end();
+	cb({status:200, response: response, error:error});
+
 };
 
 handlers.usrLogin = (datum, cb) => {
