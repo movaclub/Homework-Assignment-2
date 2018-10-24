@@ -4,19 +4,26 @@
 const crypto = require('crypto');
 
 // user-defined libs
+const emails = require('./../emails'); // index.js - module
 const menu = require('./../menu'); // index.js - module
 const users = require('./../users'); // users.db - user DB
 const sessions = require('./../sessions'); // index.js - module, session.db - session DB
 
 const handlers = {};
 
+handlers.email = (datum, cb) => {
+	emails.send(datum, (err) =>{
+		cb({status:200, emailed:true});
+	});
+};
+
 handlers.usrLogin = (datum, cb) => {
 
   let sidList = sessions.get();
 	let usrList = users.get().usrList;
-  console.log('PAYload: ', datum.payload);
-  console.log('users: ', users);
-	console.log('sidList: ', sidList);
+//   console.log('PAYload: ', datum.payload);
+//   console.log('users: ', users);
+// 	console.log('sidList: ', sidList);
 
   if ( typeof(datum) == 'object' &&
 			typeof(datum.payload) == 'object' &&

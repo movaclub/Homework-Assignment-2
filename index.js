@@ -1,5 +1,6 @@
 // index.js - app entry point & web server
 // prerequisites
+
 const http = require('http');
 const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
@@ -14,6 +15,7 @@ const acceptableMethods = ['post','get','put','delete'];
 
 // API routes
 const routes = {
+	'email': handlers.email,
   'user/login' : handlers.usrLogin,
 	'user/logout': handlers.usrLogout,
   'user/add': handlers.usrAdd, // payload = user obj
