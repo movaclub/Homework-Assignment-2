@@ -1,9 +1,14 @@
 // handlers & helpers
 
+// stripe's
+const stripeKey = 'pk_test_3p0fdr8Ka4jz3klZXmHMTv3w'; // publishable
+const stripePri = 'sk_test_69Z6EBbVfGhqJW27u0zI6gsQ';
+
 // prerequisites
 const qs = require("querystring");
 const crypto = require('crypto');
 const http = require('http');
+const https = require('https');
 
 // user-defined libs
 // const emails = require('./../emails'); // index.js - module
@@ -12,6 +17,65 @@ const users = require('./../users'); // users.db - user DB
 const sessions = require('./../sessions'); // index.js - module, session.db - session DB
 
 const handlers = {};
+
+// {
+//   "amount":"111",
+//   "currency":"usd",
+//   "source":"tok_visa",
+//   "description":"Charge for higher@low.club"
+// }
+
+handlers.stripe = (datum, cb) => {
+
+  let creds = JSON.stringify({
+    "sk_test":stripePri,
+    "amount":datum.payload.amount,
+    "currency":datum.payload.currency,
+    "source":datum.payload.tok_visa, // tok_visa
+    "description":datum.payload.description
+  });
+
+  console.log('CREDS: ', creds);
+
+  const options = {
+    "hostname": "api.stripe.com",
+    "path": "/v1/charges",
+    "method":"POST",
+    "port":443,
+    "headers":{
+      "Authorization": "Bearer iWotm_auth_token",
+      'Content-Length': creds.length,
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  };
+
+  let error = ''; // ?
+  let response = {}; // ?
+
+  let req = https.request(options, (res) => {
+    response = res;
+    console.log('STATUS:', res.statusCode);
+    console.log('HEADERS:', JSON.stringify(res.headers));
+    let chunks = [];
+
+    res.on('data', (chunk) => {
+      chunks.push(chunk);
+    });
+
+    res.on('end', () => {
+      body = Buffer.concat(chunks);
+      console.log(body.toString());
+    });
+
+
+  });
+
+  req.on('error', (err) => { error = JSON.stringify(err); console.log('EEEERRR: ', err)});
+  req.write(creds);
+  req.end();
+  cb({status:200, error:error, response:response});
+
+};
 
 handlers.email = (datum, cb) => {
 
@@ -35,8 +99,8 @@ handlers.email = (datum, cb) => {
 			'Content-Type': 'application/x-www-form-urlencoded'
 		}
 	};
-	let error = '';
-	let response = {};
+	let error = ''; // ?
+	let response = {}; // ?
 
 	let req = http.request(options, (res) => {
 		response = res;
@@ -221,7 +285,7 @@ handlers.usrUpd = (datum, cb) => {
 
 		// compile list of user strings (entries in db format)
 		datum.usrobj.usrList.forEach((oneUser) => {
-      userList.push(`${oneUser.id}|${oneUser.full_name}|${oneUser.email}|${oneUser.str_addr}|${ oneUser.password}`); // TODO:encrypt password
+      userList.push(`${oneUser.id}|${oneUser.full_name}|${oneUser.email}|${oneUser.str_addr}|${ handlers.hash(datum.payload.password)}`);
 		});
 
 		// compile a final user string
