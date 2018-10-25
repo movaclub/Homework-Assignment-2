@@ -22,16 +22,18 @@ const handlers = {};
 //   "amount":"111",
 //   "currency":"usd",
 //   "source":"tok_visa",
+//   "receipt_email":"higher@low.club",
 //   "description":"Charge for higher@low.club"
 // }
 
+// https://dashboard.stripe.com/test/logs?method=not_get (error check)
 handlers.stripe = (datum, cb) => {
 
-  let creds = JSON.stringify({
-    "sk_test":stripePri,
+  let creds = qs.stringify({
     "amount":datum.payload.amount,
     "currency":datum.payload.currency,
-    "source":datum.payload.tok_visa, // tok_visa
+    "source":datum.payload.source, // tok_visa
+    "receipt_email": datum.payload.receipt_email,
     "description":datum.payload.description
   });
 
@@ -43,17 +45,15 @@ handlers.stripe = (datum, cb) => {
     "method":"POST",
     "port":443,
     "headers":{
-      "Authorization": "Bearer iWotm_auth_token",
-      'Content-Length': creds.length,
-      'Content-Type': 'application/x-www-form-urlencoded'
+      "Authorization":`Bearer ${stripePri}`,
+      "Content-Length": creds.length,
+      "Content-Type": "application/x-www-form-urlencoded"
     }
   };
 
   let error = ''; // ?
-  let response = {}; // ?
 
   let req = https.request(options, (res) => {
-    response = res;
     console.log('STATUS:', res.statusCode);
     console.log('HEADERS:', JSON.stringify(res.headers));
     let chunks = [];
@@ -63,17 +63,16 @@ handlers.stripe = (datum, cb) => {
     });
 
     res.on('end', () => {
-      body = Buffer.concat(chunks);
-      console.log(body.toString());
+      let body = Buffer.concat(chunks);
+      console.log("Charging status: ", JSON.parse(body.toString()).status);
     });
-
 
   });
 
   req.on('error', (err) => { error = JSON.stringify(err); console.log('EEEERRR: ', err)});
   req.write(creds);
   req.end();
-  cb({status:200, error:error, response:response});
+  cb({status:200, error:error});
 
 };
 
@@ -114,7 +113,7 @@ handlers.email = (datum, cb) => {
 
 		res.on('end', () => {
 			body = Buffer.concat(chunks);
-			console.log(body.toString());
+      console.log("BODY: ", body.toString());
 		});
 
 
