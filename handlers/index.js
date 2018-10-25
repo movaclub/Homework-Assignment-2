@@ -19,6 +19,7 @@ const sessions = require('./../sessions'); // index.js - module, session.db - se
 const handlers = {};
 
 // {
+//   "sid": __sidID__
 //   "salads":["green"],
 //   "course":["borsch"],
 //   "drinks":["tea"]
