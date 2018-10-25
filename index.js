@@ -16,6 +16,8 @@ const acceptableMethods = ['post','get','put','delete'];
 // API routes
 const routes = {
 	// 'email': handlers.email,
+  'menu/order': handlers.placeOrder,
+  'menu'    : handlers.showMenu,
   'user/stripe': handlers.stripe,
   'user/login' : handlers.usrLogin,
 	'user/logout': handlers.usrLogout,

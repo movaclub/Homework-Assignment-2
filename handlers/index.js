@@ -1,7 +1,7 @@
 // handlers & helpers
 
 // stripe's
-const stripeKey = 'pk_test_3p0fdr8Ka4jz3klZXmHMTv3w'; // publishable
+// const stripeKey = 'pk_test_3p0fdr8Ka4jz3klZXmHMTv3w'; // publishable
 const stripePri = 'sk_test_69Z6EBbVfGhqJW27u0zI6gsQ';
 
 // prerequisites
@@ -17,6 +17,27 @@ const users = require('./../users'); // users.db - user DB
 const sessions = require('./../sessions'); // index.js - module, session.db - session DB
 
 const handlers = {};
+
+// {
+//   "salads":["green"],
+//   "course":["borsch"],
+//   "drinks":["tea"]
+// }
+
+handlers.placeOrder = (datum, cb) => {
+  console.log('DATUMpayload: ', datum.payload);
+  let charge = null;
+  // process the order: (1) count total, (2) charge, (3) email receipt
+  cb({status:200, order:datum.payload, charged:charge});
+};
+
+// {
+//   "menu":"all"
+// }
+handlers.showMenu = (datum, cb) => {
+  console.log('MENU: ', menu);
+  cb({status:200, menu:menu});
+};
 
 // {
 //   "amount":"111",
