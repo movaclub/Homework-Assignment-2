@@ -19,17 +19,51 @@ const sessions = require('./../sessions'); // index.js - module, session.db - se
 const handlers = {};
 
 // {
-//   "sid": __sidID__
-//   "salads":["green"],
-//   "course":["borsch"],
-//   "drinks":["tea"]
+// 	"sid": "DSNV8FZ1R00OS",
+// 	"menu":{
+// 		"salads":["green","green"],
+// 		"course":["borsch"],
+// 		"drinks":["tea"]
+// 	}
 // }
 
 handlers.placeOrder = (datum, cb) => {
-  console.log('DATUMpayload: ', datum.payload);
-  let charge = null;
-  // process the order: (1) count total, (2) charge, (3) email receipt
-  cb({status:200, order:datum.payload, charged:charge});
+  // console.log('DATUMpayload: ', datum.payload);
+
+  // process the order:
+	// get user's creds
+	let user = {};
+	sessions:sessions.get().sids.forEach((sess) => {
+
+		if( sess.sid == datum.payload.sid){
+			users.get().usrList.forEach((usr) => {
+				if( sess.uid == usr.id ){
+					user = usr;
+				}
+			});
+		}
+
+	});
+	// count total
+	let charge = 0;
+	Object.keys(datum.payload.menu).forEach((el) => {
+		datum.payload.menu[el].forEach((item) => {
+			charge += parseFloat(menu[el][item]['price']);
+		});
+	});
+	// charge via stripe & email receipt
+	charge = charge.toFixed(2);
+	let subject = 'Your new order';
+	let description = `Charge USD${charge} for ${user.email}`;
+	let mbox_from = 'welcome@pizza.com';
+	handlers.stripe({payload:{amount:charge, currency:'usd', source:'tok_visa', receipt_email:user.email, description:description}}, (err) => {
+		console.log('ERR-stripe: ', err);
+		handlers.email({payload:{from:mbox_from, to:user.email, subject:subject, text:description}}, (err) => {
+			console.log('ERR-email: ', err);
+			cb({status:200, order:datum.payload, charged:charge, user:user});
+		});
+	});
+
 };
 
 // {

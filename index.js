@@ -33,8 +33,8 @@ let usrobj = users.get();
 let userList = usrobj.usrList;
 let sidList = sessions.get();
 let empty = usrobj.empty;
-console.log('usrList: ', usrobj.usrList);
-console.log('sidList: ', sidList);
+// console.log('usrList: ', usrobj.usrList);
+// console.log('sidList: ', sidList);
 // console.log('sessions: ', sessions);
 
 let server = http.createServer((req,res) => {
@@ -88,8 +88,6 @@ let server = http.createServer((req,res) => {
         chosenHandler(datum, (ret) => {
 					usrobj = users.get();
 					sidList = sessions.get().sids;
-// 					console.log('USROBJ.empty: ', usrobj.empty);
-// 					console.log('USROBJ: ', usrobj);
           res.writeHead(ret.status);
           res.end(JSON.stringify(ret));
         });
